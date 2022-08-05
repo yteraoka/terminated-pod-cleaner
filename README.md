@@ -35,6 +35,8 @@ status:
 
 Kubernetes >= 1.21
 
+https://github.com/kubernetes/kubernetes/commit/f1de598233e3f725016c820e2bf8b7ed78005705
+
 ```yaml
 status:
   message: Pod Pod was rejected as the node is shutting down.
