@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "terminated-pod-cleaner.fullname" . }}
+  labels:
+    {{- include "terminated-pod-cleaner.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.schedule }}"
+  startingDeadlineSeconds: {{ .Values.startingDeadlineSeconds }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: {{ .Values.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.failedJobsHistoryLimit }}
+  suspend: {{ .Values.suspend }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          serviceAccountName: {{ include "terminated-pod-cleaner.serviceAccountName" . }}
+          containers:
+          - name: {{ .Chart.Name }}
+            securityContext:
+              {{- toYaml .Values.securityContext | nindent 14 }}
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            command:
+              - /bin/sh
+              - -c
+              - |
+                for ns in $(kubectl get namespace -o name | cut -d / -f 2); do
+                  echo $ns
+                  kubectl get pods -n $ns -o json | jq -r '.items[] | select(.status.phase == "Failed") | select(.status.reason == "Shutdown" or .status.reason == "NodeShutdown" or .status.reason == "Terminated") | .metadata.name' | xargs --no-run-if-empty --max-args=100 --verbose kubectl -n $ns delete pods
+                done
+          restartPolicy: OnFailure
