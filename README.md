@@ -11,11 +11,39 @@ kubectl get pods -o json \
            | .metadata.name'
 ```
 
-Install
+## Install
 
 ```
-helm install terminated-pod-cleaner ./chart
+helm upgrade terminated-pod-cleaner ./chart --install
 ```
+
+## analysis
+
+### kube-score
+
+https://kube-score.com/
+
+```
+helm template terminated-pod-cleaner ./chart | kube-score score -
+```
+
+### kube-linter
+
+https://docs.kubelinter.io/
+
+```
+helm template terminated-pod-cleaner ./chart | kube-linter lint -
+```
+
+### trivy
+
+https://aquasecurity.github.io/trivy/
+
+```
+trivy config chart
+```
+
+## Kubernetes の version による status の違い
 
 Kubernetes 1.20
 

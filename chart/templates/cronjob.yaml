@@ -34,4 +34,6 @@ spec:
                   echo $ns
                   kubectl get pods -n $ns -o json | jq -r '.items[] | select(.status.phase == "Failed") | select(.status.reason == "Shutdown" or .status.reason == "NodeShutdown" or .status.reason == "Terminated") | .metadata.name' | xargs --no-run-if-empty --max-args=100 --verbose kubectl -n $ns delete pods
                 done
+            resources:
+              {{- toYaml .Values.resources | nindent 14 }}
           restartPolicy: OnFailure
