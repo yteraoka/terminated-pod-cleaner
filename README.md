@@ -11,6 +11,19 @@ kubectl get pods -o json \
            | .metadata.name'
 ```
 
+## GKE Update
+
+GKE が自動で clean up してくれるようになった。
+
+https://cloud.google.com/kubernetes-engine/docs/release-notes#April_14_2023
+
+> **April 14, 2023**  
+> Pods bound to Preemptible and Spot nodes are now automatically deleted from the Kubernetes API server after the Preemptible or Spot instance is preempted. This is available in GKE versions:
+> - 1.25.7-gke.1000 or later
+> - 1.26.2-gke.1000 or later
+
+[Delete nodes if the GCE instance id changes and pods bound to the deleted node #368](https://github.com/kubernetes/cloud-provider-gcp/pull/368)
+
 ## Install
 
 ```
